@@ -31,6 +31,17 @@ public class TweetListModel extends AbstractTableModel {
 		return shownStatus.size();
 	}
 
+	
+	
+	@Override
+	public Class<?> getColumnClass(int arg0) {
+		if (arg0 == 2){
+			return String.class;
+		}else {
+			return super.getColumnClass(arg0);
+		}
+	}
+
 	@Override
 	public Object getValueAt(int arg0, int arg1) {
 		if (arg0 < 0 || arg0 > shownStatus.size() - 1){

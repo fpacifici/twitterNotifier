@@ -27,6 +27,12 @@ public class TweetList extends JPanel {
 		setLayout(new BorderLayout(0, 0));
 		
 		table = new JTable(model);
+		table.getColumnModel().getColumn(0).setMaxWidth(150);
+		table.getColumnModel().getColumn(1).setMaxWidth(250);
+		table.getColumnModel().getColumn(2).setMinWidth(500);
+		table.getColumnModel().getColumn(3).setMaxWidth(50);
+		table.setDefaultRenderer(String.class, new MultilineTableCellRenderer());
+		
 		add(table, BorderLayout.CENTER);
 		
 		JButton btnClose = new JButton("Close");
