@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.apache.commons.configuration.ConfigurationException;
 import org.twitterNotifier.config.Configuration;
 
 import twitter4j.Paging;
@@ -80,8 +79,6 @@ public class TwitterApiImpl implements TwitterAccess {
 		c.save();
 		}catch(TwitterException e){
 			throw new TechnicalException("Cannot contact twitter",e);
-		}catch(ConfigurationException e){
-			throw new TechnicalException("Cannot save configuration",e);
 		}
 	}
 

@@ -1,9 +1,13 @@
 package org.twitterNotifier.config;
 
+import java.io.File;
+import java.io.FileInputStream;
+
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.Properties;
 import java.util.logging.Level;
 
-import org.apache.commons.configuration.ConfigurationException;
-import org.apache.commons.configuration.PropertiesConfiguration;
 
 /**
  * Provides the configuraiton to the whole application
@@ -14,7 +18,7 @@ import org.apache.commons.configuration.PropertiesConfiguration;
 public class Configuration {
 	private static Configuration instance;
 	
-	private PropertiesConfiguration config;
+	private Properties config;
 	
 	public static Configuration getInstance(){
 		if (instance == null){
@@ -25,8 +29,9 @@ public class Configuration {
 	
 	public Configuration() {
 		try {
-			config = new PropertiesConfiguration("twitterNotifier.properties");
-		}catch(ConfigurationException e){
+			config = new Properties();
+			config.load(new FileInputStream(new File("twitterNotifier.properties")));
+		}catch(IOException e){
 			e.printStackTrace();
 		}
 	}
@@ -39,8 +44,12 @@ public class Configuration {
 		config.setProperty("oauth.secret", secret);
 	}
 	
-	public void save() throws ConfigurationException{
-		config.save();
+	public void save() {
+		try{
+			config.store(new FileOutputStream(new File("twitterNotifier.properties")), "twitterNotifier automatically saved config");
+		}catch(IOException e){
+			e.printStackTrace();
+		}
 	}
 	 
 	public String getToken(){
