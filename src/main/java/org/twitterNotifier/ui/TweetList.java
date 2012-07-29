@@ -17,7 +17,7 @@ import twitter4j.Status;
  */
 public class TweetList extends JPanel {
 
-	private List<Status> shownStatus = new LinkedList<>(); 
+	private List<Status> shownStatus = new LinkedList<Status>(); 
 
 	JTextArea area = new JTextArea();
 	

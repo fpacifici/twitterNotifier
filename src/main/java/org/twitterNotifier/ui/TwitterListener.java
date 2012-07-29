@@ -43,7 +43,7 @@ public class TwitterListener implements TweetListener {
 	}
 
 	private Image getPresentImage() throws HeadlessException {
-		ImageIcon defaultIcon = new ImageIcon(this.getClass().getResource("../twitterIcon.gif"));
+		ImageIcon defaultIcon = new ImageIcon(this.getClass().getResource("/org/twitterNotifier/twitterIcon.gif"));
 		return defaultIcon.getImage();
 	
 	}
