@@ -1,5 +1,7 @@
 package org.twitterNotifier.config;
 
+import java.util.logging.Level;
+
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
 
@@ -47,5 +49,10 @@ public class Configuration {
 	
 	public String getSecret() {
 		return (String)config.getProperty("oauth.secret");
+	}
+	
+	public Level getLogLevel(){
+		String level = (String)config.getProperty("loglevel");
+		return Level.parse(level);
 	}
 }

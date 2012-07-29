@@ -1,5 +1,7 @@
 package org.twitterNotifier.twitterapi;
 
+import twitter4j.auth.RequestToken;
+
 /**
  * Main access interface to twitter.
  * 
@@ -8,16 +10,37 @@ package org.twitterNotifier.twitterapi;
  * An instance of the implementaiton of this interface represents a statefull connection
  * with a Twitter account.
  * 
+ * 
+ * 
  * @author fpacifici
  *
  */
 public interface TwitterAccess {
 	
 	/**
+	 * Writes given the pin and stores into configuration
+	 * @param token
+	 * @param pin
+	 */
+	public void storeAccessToken(String pin);
+	
+	/**
+	 * Creates a connection request URL.
+	 * @return
+	 */
+	public RequestToken prepareConnectionRequest();
+	
+	/**
 	 * Initializes the api, and performs the login.
 	 *
 	 */
-	public void init(String token, String secret);
+	public void init();
+	
+	/**
+	 * Return true if I have an access token and an access secret.
+	 * @return
+	 */
+	public boolean isConfigured();
 	
 	/**
 	 * Starts the listener.

@@ -31,7 +31,7 @@ public class TweetList extends JPanel {
 	 */
 	public void addTweets(List<Status> tweets){
 		if (tweets != null && tweets.size() > 0){
-			ListIterator<Status> it = tweets.listIterator(tweets.size() - 1);
+			ListIterator<Status> it = tweets.listIterator(tweets.size());
 			while (it.hasPrevious()){
 				Status tweet = it.previous();
 				shownStatus.add(0, tweet);
@@ -41,6 +41,7 @@ public class TweetList extends JPanel {
 		if (shownStatus.size() > 20){
 			Iterator<Status> it2 = shownStatus.listIterator(20);
 			while (it2.hasNext()){
+				it2.next();
 				it2.remove();
 			}
 		}

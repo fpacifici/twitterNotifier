@@ -8,8 +8,10 @@ import java.awt.image.BufferedImage;
 import java.util.List;
 
 import javax.swing.Icon;
+import javax.swing.ImageIcon;
 import javax.swing.plaf.metal.MetalIconFactory;
 
+import org.twitterNotifier.TwitterNotifier;
 import org.twitterNotifier.twitterapi.TweetListener;
 
 import twitter4j.Status;
@@ -40,12 +42,9 @@ public class TwitterListener implements TweetListener {
 		}
 	}
 
-	private static Image getPresentImage() throws HeadlessException {
-		Icon defaultIcon = MetalIconFactory.getTreeHardDriveIcon();
-		Image img = new BufferedImage(defaultIcon.getIconWidth(),
-				defaultIcon.getIconHeight(), BufferedImage.TYPE_4BYTE_ABGR);
-		defaultIcon.paintIcon(new Panel(), img.getGraphics(), 0, 0);
-
-		return img;
+	private Image getPresentImage() throws HeadlessException {
+		ImageIcon defaultIcon = new ImageIcon(this.getClass().getResource("../twitterIcon.gif"));
+		return defaultIcon.getImage();
+	
 	}
 }

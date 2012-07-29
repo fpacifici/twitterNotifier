@@ -10,21 +10,32 @@ import java.awt.SystemTray;
 import java.awt.TrayIcon;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.awt.image.BufferedImage;
 import java.util.Scanner;
+import java.util.logging.Logger;
 
 import javax.swing.Icon;
+import javax.swing.ImageIcon;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.plaf.metal.MetalIconFactory;
 
 import org.twitterNotifier.config.Configuration;
+import org.twitterNotifier.twitterapi.TechnicalException;
 import org.twitterNotifier.twitterapi.TwitterAccess;
+import org.twitterNotifier.twitterapi.TwitterAccessFactory;
 import org.twitterNotifier.twitterapi.TwitterApiImpl;
+import org.twitterNotifier.ui.MainMenuExecutor;
+import org.twitterNotifier.ui.MainNotifierMenu;
 import org.twitterNotifier.ui.TweetList;
 import org.twitterNotifier.ui.TwitterListener;
+import org.twitterNotifier.ui.TwitterRegistrationPanel;
 
 import twitter4j.auth.RequestToken;
+
 
 /**
  * Main class for twitter notifier. It manages the whole app cycle
@@ -32,51 +43,45 @@ import twitter4j.auth.RequestToken;
  * @author fpacifici
  * 
  */
-public class TwitterNotifier {
-
-	private TwitterAccess twitterAccess;
-
+public class TwitterNotifier implements MainMenuExecutor{
+	
 	private TrayIcon icon;
 
 	private TweetList tList;
+	
+	private MainNotifierMenu menu;
+	
+	private NotifierJob job;
 
+	private Logger logger = Logger.getLogger("Main");
+	
 	/**
 	 * @param args
 	 */
 	public static void main(String[] args) {
 		TwitterNotifier notifier = new TwitterNotifier();
-		notifier.startCycle();
+		notifier.job.run();
 	}
 
 	/**
 	 * Basic instantiation
 	 */
 	public TwitterNotifier() {
+		Configuration c = Configuration.getInstance();
+		
 		tList = new TweetList();
+		menu = createPopupMenu();
 		icon = new TrayIcon(getImage(), "Java application as a tray icon",
-				createPopupMenu());
-		icon.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				JOptionPane.showMessageDialog(null, "Hey, you activated me!");
-			}
-		});
+				menu);
+		
 		try {
 			SystemTray.getSystemTray().add(icon);
 		} catch (AWTException e) {
 			e.printStackTrace();
 		}
-	}
-
-	/**
-	 * start twitter listening.
-	 */
-	public void startCycle() {
-		twitterAccess = new TwitterApiImpl();
-		Configuration c = Configuration.getInstance();
-		twitterAccess.init(c.getToken(), c.getSecret());
-
-		TwitterListener listener = new TwitterListener(tList, icon);
-		twitterAccess.startListening(listener, 30000);
+		
+		job = new NotifierJob();
+		job.reset(tList, icon);
 	}
 
 	/**
@@ -85,31 +90,100 @@ public class TwitterNotifier {
 	 * @return
 	 * @throws HeadlessException
 	 */
-	private PopupMenu createPopupMenu() throws HeadlessException {
-		PopupMenu menu = new PopupMenu();
-
-		MenuItem exit = new MenuItem("Exit");
-		exit.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				System.exit(0);
-			}
-		});
-		menu.add(exit);
-		MenuItem show = new MenuItem("Show recent tweets");
-		show.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				JFrame frame = new JFrame("Recent tweets");
-				frame.setSize(300, 400);
-				frame.add(tList);
-				frame.setVisible(true);
-				icon.setImage(getImage());
-			}
-		});
-
-		menu.add(show);
+	private MainNotifierMenu createPopupMenu() throws HeadlessException {
+		MainNotifierMenu menu = new MainNotifierMenu(this);
+		
 		return menu;
+	}
+	
+	
+
+	@Override
+	public void clickExit() {
+		System.exit(0);
+	}
+
+	@Override
+	public void clickSetup() {
+		job.setStop();
+		job.reset(tList, icon);
+		
+		JDialog dialog = new JDialog();
+		dialog.add(new TwitterRegistrationPanel());
+		dialog.setSize(700, 150);
+		
+		dialog.addWindowListener(new WindowListener() {
+			
+			@Override
+			public void windowOpened(WindowEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void windowIconified(WindowEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void windowDeiconified(WindowEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void windowDeactivated(WindowEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void windowClosing(WindowEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void windowClosed(WindowEvent e) {
+				logger.info("Resetting the job");
+				job.reset(tList, icon);
+			}
+			
+			@Override
+			public void windowActivated(WindowEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
+		
+		dialog.setVisible(true);
+		
+	}
+
+	@Override
+	public void clickStart() {
+		job.setStart();
+		menu.setStartEnabled(false);
+		menu.setStopEnabled(true);
+		
+	}
+
+	@Override
+	public void clickStop() {
+		job.setStop();
+		menu.setStartEnabled(true);
+		menu.setStopEnabled(false);
+	}
+
+	
+	@Override
+	public void clickShow() {
+		JDialog frame = new JDialog();
+		frame.setSize(700, 400);
+		frame.add(tList);
+		frame.setVisible(true);
+		icon.setImage(getImage());
 	}
 
 	/**
@@ -119,11 +193,7 @@ public class TwitterNotifier {
 	 * @throws HeadlessException
 	 */
 	private Image getImage() throws HeadlessException {
-		Icon defaultIcon = MetalIconFactory.getTreeFloppyDriveIcon();
-		Image img = new BufferedImage(defaultIcon.getIconWidth(),
-				defaultIcon.getIconHeight(), BufferedImage.TYPE_4BYTE_ABGR);
-		defaultIcon.paintIcon(new Panel(), img.getGraphics(), 0, 0);
-
-		return img;
+		ImageIcon defaultIcon = new ImageIcon(this.getClass().getResource("twitterIconGray.gif"));
+		return defaultIcon.getImage();
 	}
 }
