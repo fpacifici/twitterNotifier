@@ -1,28 +1,42 @@
 package org.twitterNotifier.ui;
 
+import javax.swing.JPanel;
+import java.awt.BorderLayout;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 
-import javax.swing.JPanel;
-import javax.swing.JTextArea;
+import javax.swing.JTable;
+import javax.swing.JButton;
+import javax.swing.table.TableColumn;
 
 import twitter4j.Status;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 
-/**
- * Contains the list of tweets to show
- * @author pyppo
- *
- */
 public class TweetList extends JPanel {
+	private JTable table;
 
-	private List<Status> shownStatus = new LinkedList<Status>(); 
-
-	JTextArea area = new JTextArea();
+	private TweetListModel model = new TweetListModel();
 	
-	public TweetList(){
-		add(area);
+	/**
+	 * Create the panel.
+	 */
+	public TweetList() {
+		setLayout(new BorderLayout(0, 0));
+		
+		table = new JTable(model);
+		add(table, BorderLayout.CENTER);
+		
+		JButton btnClose = new JButton("Close");
+		btnClose.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				TweetList.this.getParent().setVisible(false);
+			}
+		});
+		add(btnClose, BorderLayout.SOUTH);
+
 	}
 	
 	/**
@@ -30,35 +44,8 @@ public class TweetList extends JPanel {
 	 * @param tweets
 	 */
 	public void addTweets(List<Status> tweets){
-		if (tweets != null && tweets.size() > 0){
-			ListIterator<Status> it = tweets.listIterator(tweets.size());
-			while (it.hasPrevious()){
-				Status tweet = it.previous();
-				shownStatus.add(0, tweet);
-			}
-		}
-		//normalize the list to 20
-		if (shownStatus.size() > 20){
-			Iterator<Status> it2 = shownStatus.listIterator(20);
-			while (it2.hasNext()){
-				it2.next();
-				it2.remove();
-			}
-		}
-		printOutput();
+		model.addTweets(tweets);
+		table.setModel(model);
 	}
-	
-	private void printOutput(){
-		StringBuilder b = new StringBuilder();
-		for (Status tweet : shownStatus){
-			b.append(tweet.getCreatedAt().toString());
-			b.append(" - ");
-			b.append(tweet.getUser().getName());
-			b.append(" - ");
-			b.append(tweet.getText());
-			b.append('\n');
-		}
-		area.setText(b.toString());
-		
-	}
+
 }
